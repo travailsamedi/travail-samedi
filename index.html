@@ -15,7 +15,7 @@
   <title>Travail Samedi</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; background: #6366f1; }
+    html, body { height: 100%; overflow: hidden; background: #6366f1; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     iframe { width: 100%; height: 100%; border: 0; display: block; }
     .loading {
       position: fixed; inset: 0;
@@ -29,6 +29,14 @@
     .loading-icon { font-size: 60px; margin-bottom: 20px; animation: pulse 1.5s ease-in-out infinite; }
     .loading-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
     .loading-sub { font-size: 13px; opacity: 0.85; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 20px auto 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
   </style>
 </head>
@@ -37,16 +45,34 @@
     <div class="loading-icon">📊</div>
     <div class="loading-title">Travail Samedi</div>
     <div class="loading-sub">جاري التحميل...</div>
+    <div class="spinner"></div>
   </div>
-  <iframe id="appFrame" src="https://script.google.com/macros/s/AKfycbz0b01LCEFwxpQwNWSPaI8-x7H2WuyKts2siXNV9_W6rV_67IdnIKCTarFXMj6-MG0OkA/exec" allow="clipboard-read; clipboard-write"></iframe>
+
+  <div id="appContainer"></div>
+
   <script>
-    document.getElementById('appFrame').onload = function() {
-      setTimeout(function() {
-        document.getElementById('loading').classList.add('hide');
-      }, 1500);
-    };
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    var APP_URL = "https://script.google.com/macros/s/AKfycbz0b01LCEFwxpQwNWSPaI8-x7H2WuyKts2siXNV9_W6rV_67IdnIKCTarFXMj6-MG0OkA/exec";
+    var ua = navigator.userAgent.toLowerCase();
+    var isIOS = /iphone|ipad|ipod/.test(ua);
+    var isSafari = /safari/.test(ua) && !/chrome|crios|android/.test(ua);
+
+    if (isIOS && isSafari) {
+      // 🍎 iPhone/iPad Safari: iframe (بلا شريط)
+      var iframe = document.createElement('iframe');
+      iframe.src = APP_URL;
+      iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
+      iframe.onload = function() {
+        setTimeout(function() {
+          document.getElementById('loading').classList.add('hide');
+        }, 1500);
+      };
+      document.getElementById('appContainer').appendChild(iframe);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    } else {
+      // 🤖 Android + 💻 PC: redirect مباشر
+      window.location.replace(APP_URL);
     }
   </script>
 </body>
